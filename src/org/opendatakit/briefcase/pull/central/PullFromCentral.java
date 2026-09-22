@@ -123,7 +123,7 @@ public class PullFromCentral {
                     .filter(attachment -> !inDb || !form.getSubmissionMediaFile(briefcaseDir, instanceId, attachment.getName()).toFile().exists())
                     .forEach(attachment ->
                         downloadSubmissionAttachment(form, instanceId, attachment, token, runnerStatus, tracker, currentSubmissionNumber, totalSubmissions, attachmentNumber.getAndIncrement(), totalAttachments)
-                  );
+                    );
                 if (!runnerStatus.isCancelled() && !inDb) {
                   db.putRecordedInstanceDirectory(instanceId, form.getSubmissionDir(briefcaseDir, instanceId).toFile());
                 }

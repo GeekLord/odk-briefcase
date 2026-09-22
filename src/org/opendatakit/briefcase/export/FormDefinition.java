@@ -37,6 +37,7 @@ import org.javarosa.core.model.IDataReference;
 import org.javarosa.core.model.IFormElement;
 import org.javarosa.core.model.ItemsetBinding;
 import org.javarosa.core.model.QuestionDef;
+import org.javarosa.core.model.SelectChoice;
 import org.javarosa.core.model.instance.DataInstance;
 import org.javarosa.core.model.instance.ExternalDataInstance;
 import org.javarosa.core.model.instance.InstanceInitializationFactory;
@@ -46,6 +47,7 @@ import org.javarosa.xform.parse.XFormParser;
 import org.opendatakit.briefcase.model.BriefcaseFormDefinition;
 import org.opendatakit.briefcase.model.ParsingException;
 import org.opendatakit.briefcase.reused.BriefcaseException;
+import org.opendatakit.briefcase.util.XFormParsing;
 
 /**
  * This class holds all the relevant information about the form being exported.
@@ -83,7 +85,7 @@ public class FormDefinition {
     try (InputStream in = Files.newInputStream(Files.exists(revised) ? revised : formFile);
          InputStreamReader isr = new InputStreamReader(in, UTF_8);
          BufferedReader br = new BufferedReader(isr)) {
-      FormDef formDef = new XFormParser(XFormParser.getXMLDocument(br)).parse();
+      FormDef formDef = XFormParsing.parse(new XFormParser(XFormParser.getXMLDocument(br)));
       boolean isEncrypted = Optional.ofNullable(formDef.getSubmissionProfile())
           .flatMap(sp -> Optional.ofNullable(sp.getAttribute("base64RsaPublicKey")))
           .filter(s -> !s.isEmpty())
@@ -95,7 +97,7 @@ public class FormDefinition {
           isEncrypted,
           new Model(formDef.getMainInstance().getRoot(), getFormControls(formDef))
       );
-    } catch (IOException e) {
+    } catch (IOException | XFormParser.ParseException e) {
       throw new ParsingException(e);
     }
   }
@@ -138,7 +140,11 @@ public class FormDefinition {
               try {
                 // Never randomize the choice order to ensure stable column order when using split select multiples
                 itemsetBinding.randomize = false;
-                formDef.populateDynamicChoices(itemsetBinding, (TreeReference) control.getBind().getReference());
+                // JavaRosa computes itemset choices on demand and no longer stores them in the
+                // binding, so we bake them into the control's static choice list for the Model to read
+                List<SelectChoice> choices = itemsetBinding.getChoices(formDef, (TreeReference) control.getBind().getReference());
+                if (choices != null)
+                  choices.forEach(control::addSelectChoice);
               } catch (NullPointerException e) {
                 // Ignore (see https://github.com/getodk/briefcase/issues/789)
               }

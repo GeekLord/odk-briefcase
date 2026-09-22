@@ -30,7 +30,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -41,7 +40,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
-import org.bouncycastle.openssl.PEMReader;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+import org.bouncycastle.openssl.PEMKeyPair;
+import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.opendatakit.briefcase.model.BriefcasePreferences;
 import org.opendatakit.briefcase.reused.BriefcaseException;
 import org.opendatakit.briefcase.reused.OverridableBoolean;
@@ -118,7 +120,7 @@ public class ExportConfiguration {
     try (InputStream is = newInputStream(pemFile);
          InputStreamReader isr = new InputStreamReader(is, UTF_8);
          BufferedReader br = new BufferedReader(isr);
-         PEMReader pr = new PEMReader(br)
+         PEMParser pr = new PEMParser(br)
     ) {
       Object o = pr.readObject();
       if (o == null) {
@@ -126,11 +128,15 @@ public class ExportConfiguration {
         return Optional.empty();
       }
 
-      if (o instanceof KeyPair)
-        return Optional.of(((KeyPair) o).getPrivate());
+      JcaPEMKeyConverter converter = new JcaPEMKeyConverter();
 
-      if (o instanceof PrivateKey)
-        return Optional.of(((PrivateKey) o));
+      // Traditional (PKCS#1) "BEGIN RSA PRIVATE KEY" files
+      if (o instanceof PEMKeyPair)
+        return Optional.of(converter.getKeyPair((PEMKeyPair) o).getPrivate());
+
+      // PKCS#8 "BEGIN PRIVATE KEY" files
+      if (o instanceof PrivateKeyInfo)
+        return Optional.of(converter.getPrivateKey((PrivateKeyInfo) o));
 
       log.warn("The supplied file does not contain a private key");
       return Optional.empty();

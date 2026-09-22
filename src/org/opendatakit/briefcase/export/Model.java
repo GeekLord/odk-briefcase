@@ -39,7 +39,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import org.javarosa.core.model.DataType;
-import org.javarosa.core.model.ItemsetBinding;
 import org.javarosa.core.model.QuestionDef;
 import org.javarosa.core.model.SelectChoice;
 import org.javarosa.core.model.instance.TreeElement;
@@ -272,13 +271,12 @@ class Model {
     if (maybeControl.map(QuestionDef::getAppearanceAttr).map(s -> s.contains("search(")).orElse(false))
       return emptyList();
 
-    // Try to return dynamic choices first, then static choices
-    // Dynamic choices can be present when using an internal
-    // secondary itemset with a predicate
+    // Choices coming from an internal secondary itemset (with or without a
+    // predicate) have already been resolved into the control's static choice
+    // list by FormDefinition, so static choices are all we need to look at here
     return maybeControl
-        .map(QuestionDef::getDynamicChoices)
-        .map(ItemsetBinding::getChoices)
-        .orElseGet(() -> maybeControl.map(QuestionDef::getChoices).orElse(emptyList()));
+        .map(QuestionDef::getChoices)
+        .orElse(emptyList());
   }
 
   boolean isMetaAudit() {

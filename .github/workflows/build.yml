@@ -1,0 +1,53 @@
+name: Build
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Check, test and package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+        with:
+          # Full history so `git describe --tags` can produce a meaningful version name
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Set up logging configuration
+        run: |
+          cp res/logback.xml.example res/logback.xml
+          cp test/resources/logback-test.xml.example test/resources/logback-test.xml
+
+      - name: Check, test and package
+        # Swing tests need a display
+        run: xvfb-run -a --server-args="-screen 0 1280x1024x24" ./gradlew --no-daemon check jacocoTestReport jar
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports
+          path: build/reports
+          if-no-files-found: ignore
+
+      - name: Upload JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: ODK-Briefcase
+          path: build/libs/*.jar

@@ -1,67 +1,157 @@
-## ⚠️ ODK Briefcase is no longer being updated. If you're using Briefcase for CSV exports, data decryption, or automation, please use [ODK Central](https://github.com/getodk/central) instead. ⚠️
-
 # ODK Briefcase
-![Platform](https://img.shields.io/badge/platform-Java-blue.svg)
+
+![Platform](https://img.shields.io/badge/platform-Java%2017%2B-blue.svg)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Build status](https://circleci.com/gh/getodk/briefcase.svg?style=shield&circle-token=:circle-token)](https://circleci.com/gh/getodk/briefcase)
+[![Build](https://github.com/GeekLord/odk-briefcase/actions/workflows/build.yml/badge.svg)](https://github.com/GeekLord/odk-briefcase/actions/workflows/build.yml)
 [![Slack](https://img.shields.io/badge/chat-on%20slack-brightgreen)](https://slack.getodk.org)
 
-ODK Briefcase is a desktop application that can locally store survey results gathered with [ODK Collect](https://docs.getodk.org/collect-intro/). It can also be used to make local copies and CSV exports of data from [ODK Aggregate](https://docs.getodk.org/aggregate-intro/) (or compatible servers) and push data to those servers.
+Desktop application for pulling, pushing, and exporting survey data collected with [ODK Collect](https://docs.getodk.org/collect-intro/). It stores forms and submissions locally, exports them to CSV (and GeoJSON), decrypts encrypted forms, and can sync with [ODK Aggregate](https://docs.getodk.org/aggregate-intro/) or [ODK Central](https://docs.getodk.org/central-intro/).
 
-ODK Briefcase is part of ODK, a free and open-source set of tools which help organizations author, field, and manage mobile data collection solutions. Learn more about the ODK project and its history [here](https://getodk.org) and read about example ODK deployments [here](https://forum.getodk.org/c/showcase).
+**This repository is the current codebase for ODK Briefcase.** The original project, [getodk/briefcase](https://github.com/getodk/briefcase), is [archived](https://github.com/getodk/briefcase) (read-only). Its last release was [ODK Briefcase v1.18.0](https://github.com/getodk/briefcase/releases/tag/v1.18.0) (November 2020), and the repository received no further commits after April 2022. New development, dependency updates, and builds live here.
+
+| | |
+| --- | --- |
+| **Maintainer** | [Shobhit Kumar Prabhakar](https://github.com/GeekLord) |
+| **This repository** | [https://github.com/GeekLord/odk-briefcase](https://github.com/GeekLord/odk-briefcase) |
+| **Upstream (archived)** | [https://github.com/getodk/briefcase](https://github.com/getodk/briefcase) |
+| **License** | [Apache License 2.0](LICENSE.md) |
+| **What changed since the archive** | [CHANGELOG.md](CHANGELOG.md) |
+
+The ODK project recommends [ODK Central](https://github.com/getodk/central) for many of the workflows Briefcase used to cover (CSV export, decryption, automation). This fork exists so Briefcase itself can keep running and be extended on a current Java toolchain. Usage documentation for the application is still published by ODK at [docs.getodk.org/briefcase-intro](https://docs.getodk.org/briefcase-intro/).
 
 * ODK website: [https://getodk.org](https://getodk.org)
-* ODK Briefcase usage instructions: [https://docs.getodk.org/briefcase-intro/](https://docs.getodk.org/briefcase-intro/)
 * ODK forum: [https://forum.getodk.org](https://forum.getodk.org)
-* ODK developer Slack chat: [https://slack.getodk.org](https://slack.getodk.org)
-* ODK developer wiki: [https://github.com/getodk/getodk/wiki](https://github.com/getodk/getodk/wiki)
+* ODK developer Slack: [https://slack.getodk.org](https://slack.getodk.org)
 
-## Setting up your development environment
+## Requirements
 
-1. Fork the briefcase project ([why and how to fork](https://help.github.com/articles/fork-a-repo/))
+- **Java 17 or later** to build and to run the packaged JAR (for example [Eclipse Temurin](https://adoptium.net/)). The build emits Java 17 bytecode no matter which newer JDK compiles it.
+- The [Gradle wrapper](https://docs.gradle.org/current/userguide/gradle_wrapper.html) (`./gradlew`, `gradlew.bat`) downloads Gradle 9 on first use. You do not install Gradle yourself.
 
-1. Clone your fork of the project locally. At the command line:
+Java 8 and Java 11 are no longer supported. The unlimited-strength cryptography policy files required by older JDKs are unnecessary on Java 17+.
 
-        git clone https://github.com/YOUR-GITHUB-USERNAME/briefcase
+## What this fork updates
 
-We recommend using [IntelliJ IDEA](https://www.jetbrains.com/idea/) for development. On the welcome screen, click `Import Project`, navigate to your briefcase folder, and select the `build.gradle` file. Use the defaults through the wizard. Once the project is imported, IntelliJ may ask you to update your remote maven repositories. Follow the instructions to do so.
+The application behavior is the same Briefcase you already know (Pull, Push, Export, Settings, and the CLI operations). The engineering baseline underneath it has been brought forward from the archived tree:
 
-If you're using IntelliJ IDEA, we also recommend you [import the code style scheme](https://www.jetbrains.com/help/idea/copying-code-style-settings.html) for Briefcase at `config/codestyle/codestyle.xml`. Once you activate that scheme, use the automatic reformatting tool to produce code that will comply with the checkstyle rules of the project.
+- **Gradle 5.4.1 → 9.7.1**, with a rewritten `build.gradle` that uses current Gradle APIs only.
+- **Java 8 bytecode → Java 17** (`javac --release 17`).
+- **Dependencies** moved to current releases: JavaRosa 6, Bouncy Castle 1.86, Apache HttpClient 4.5.14, HSQLDB 2.7, Jackson 2.22, SLF4J 2, Logback 1.6, Sentry 8, and current test libraries. See [CHANGELOG.md](CHANGELOG.md) for the full list and the source changes each upgrade required.
+- **`BuildConfig`** is generated by the `generateBuildConfig` Gradle task (the old third-party plugin is gone). Optional `sentry.enabled`, `sentry.dsn`, and `googleAnalytics.trackingId` values still come from a gitignored `gradle.properties`.
+- **CI** is [GitHub Actions](.github/workflows/build.yml). The archived CircleCI config is removed.
+- **Checkstyle 12.3.1** enforces the same project style rules. That is the newest Checkstyle release that still runs on Java 17.
 
-The main class is `org.opendatakit.briefcase.ui.MainBriefcaseWindow`. This repository also contains code for three smaller utilities with the following main classes:
-- `org.opendatakit.briefcase.ui.CharsetConverterDialog` converts CSVs to UTF-8
-- `org.opendatakit.briefcase.ui.MainClearBriefcasePreferencesWindow` clears Briefcase preferences
-- `org.opendatakit.briefcase.ui.MainFormUploaderWindow` uploads blank forms to Aggregate instances
+## Getting the application
 
-There might be some compile errors in the IDE about a missing class `BuildConfig`. That class is generated by gradle and the warnings can be ignored.
+**Build it yourself** (any commit):
 
-If you are working with [encrypted forms](https://docs.getodk.org/encrypted-forms/) you may get an `InvalidKeyException`. This is because you do not have an unlimited crypto policy enabled in Java. Do this:
+```bash
+git clone https://github.com/GeekLord/odk-briefcase.git
+cd odk-briefcase
+./gradlew jar
+java -jar build/libs/ODK-Briefcase-*.jar
+```
 
-* Java 8 Update 151 or later: Set `crypto.policy=unlimited` in `$JAVA_HOME/jre/lib/security/java.security`
-* Java 8: Install [Unlimited Strength Policy Files 8](http://www.oracle.com/technetwork/java/javase/downloads/jce8-download-2133166.html) in `$JAVA_HOME/jre/lib/security`
-* Java 7: Install [Unlimited Strength Policy Files 7](http://www.oracle.com/technetwork/java/javase/downloads/jce-7-download-432124.html) in `$JAVA_HOME/jre/lib/security`
+**Download a CI build:** every push to `master` and every pull request is built by [GitHub Actions](https://github.com/GeekLord/odk-briefcase/actions/workflows/build.yml). Open a run and download the `ODK-Briefcase` artifact (the runnable JAR) or the `reports` artifact (tests, JaCoCo, checkstyle).
 
-## Running the project
+Historical releases of the original project remain on the [ODK website](https://getodk.org/software/) and the [archived releases page](https://github.com/getodk/briefcase/releases). Those JARs target Java 8 and are not built from this repository.
 
-To run the project, go to the `View` menu, then `Tool Windows > Gradle`. `run` will be in `odk-briefcase > Tasks > application > run`. Double-click `run` to run the application. This Gradle task will now be the default action in your `Run` menu.
+The JAR file name and the version string inside the app come from `git describe --tags --dirty --always`. On a commit with no newer tag that is the short commit id.
 
-You must use the Gradle task to run the application because there is a generated class (`BuildConfig`) that IntelliJ may not properly import and recognize.
+## Setting up a development environment
 
-To package a runnable jar, use the `jar` Gradle task.
+1. Fork [GeekLord/odk-briefcase](https://github.com/GeekLord/odk-briefcase) ([why and how to fork](https://docs.github.com/articles/fork-a-repo)).
+2. Clone your fork:
 
-To try the app, you can use the demo server. In the window that opens when running, choose Connect, then fill in the URL [https://opendatakit.appspot.com](https://opendatakit.appspot.com) leave username and password blank.
+```bash
+git clone https://github.com/YOUR-GITHUB-USERNAME/odk-briefcase.git
+cd odk-briefcase
+```
+
+3. Create the gitignored logging configs from the checked-in examples:
+
+```bash
+cp res/logback.xml.example res/logback.xml
+cp test/resources/logback-test.xml.example test/resources/logback-test.xml
+```
+
+4. Build, test, and package:
+
+```bash
+./gradlew check jar
+```
+
+Swing UI tests need a display. On a headless Linux machine:
+
+```bash
+xvfb-run -a ./gradlew check
+```
+
+[IntelliJ IDEA](https://www.jetbrains.com/idea/) is the recommended IDE. On the welcome screen choose **Open**, select `build.gradle`, and accept the defaults. Import the code style at `config/codestyle/codestyle.xml` ([how](https://www.jetbrains.com/help/idea/configuring-code-style.html)) so reformatting matches checkstyle.
+
+Entry points:
+
+| Class | Role |
+| --- | --- |
+| `org.opendatakit.briefcase.Launcher` | Main class. No arguments opens the GUI; otherwise runs a CLI operation. |
+| `org.opendatakit.briefcase.ui.MainBriefcaseWindow` | Main window (Pull, Push, Export, Settings). |
+| `org.opendatakit.briefcase.ui.CharsetConverterDialog` | Converts CSVs to UTF-8. |
+| `org.opendatakit.briefcase.ui.MainClearBriefcasePreferencesWindow` | Clears saved preferences. |
+| `org.opendatakit.briefcase.ui.MainFormUploaderWindow` | Uploads blank forms to Aggregate. |
+
+`org.opendatakit.briefcase.buildconfig.BuildConfig` is generated into `build/generated/sources/buildConfig`. If the IDE says it is missing, run any Gradle task (or reimport the Gradle project) and it will appear.
+
+## Running
+
+```bash
+./gradlew run                 # GUI
+./gradlew jar                 # build/libs/ODK-Briefcase-<version>.jar
+java -jar build/libs/ODK-Briefcase-*.jar
+java -jar build/libs/ODK-Briefcase-*.jar --help
+```
+
+In IntelliJ: **View → Tool Windows → Gradle → odk-briefcase → Tasks → application → run**. Use that Gradle task rather than a plain Application run configuration so `BuildConfig` is generated first.
+
+On the first launch only **Settings** is enabled until you choose a storage directory. After that, Pull, Push, and Export unlock. CLI operations are listed by `--help` (`--pull_aggregate`, `--pull_central`, `--push_aggregate`, `--push_central`, `--export`, `--pull_collect`, `--clear_prefs`).
+
+## Project layout
+
+| Path | Contents |
+| --- | --- |
+| `src/` | Application sources (`org.opendatakit.briefcase`, plus the Aggregate form parser under `org.opendatakit.aggregate`) |
+| `res/` | Runtime resources (icons, logback examples, license text) |
+| `test/java`, `test/resources` | Unit and integration tests, form fixtures |
+| `lib/` | `smallsql-0.21.jar` (legacy briefcase databases) and the Eclipse jar-in-jar loader |
+| `config/checkstyle`, `config/codestyle` | Checkstyle rules and the IntelliJ code style |
+| `docs/` | [Export CSV format](docs/export-format.md), [how to release](docs/how-to-release.md) |
+| `build.gradle`, `settings.gradle` | Gradle 9 build (plugins: `application`, `checkstyle`, `jacoco`, `idea`) |
+| `.github/workflows/build.yml` | CI: JDK 17, Xvfb, `check jacocoTestReport jar` |
+
+The runnable JAR is **not** a flattened fat JAR. Bouncy Castle ships signed jars, which break if they are unpacked and repacked, so dependencies are nested and loaded by Eclipse's jar-in-jar loader (`Main-Class` is `JarRsrcLoader`; `Rsrc-Main-Class` is `org.opendatakit.briefcase.Launcher`).
+
+### Dependencies
+
+| Purpose | Library | Version in this tree |
+| --- | --- | --- |
+| XForm parsing | [JavaRosa](https://github.com/getodk/javarosa) | 6.0.0 |
+| Encrypted forms | [Bouncy Castle](https://www.bouncycastle.org/) `bcprov` and `bcpkix` (jdk18on) | 1.86 |
+| HTTP | Apache HttpClient, httpmime, fluent-hc | 4.5.14 |
+| Local database | HSQLDB (SmallSQL remains bundled for old storages) | 2.7.4 |
+| JSON / GeoJSON | Jackson, geojson-jackson | 2.22.3 / 1.14 |
+| Logging | SLF4J 2 + Logback, plus jcl-over-slf4j | 2.0.20 / 1.6.3 |
+| Error reporting | Sentry (off unless `sentry.enabled=true`) | 8.57.0 |
+| UI extras | LGoodDatePicker, EventBus | 11.2.1 / 1.4 |
+| Tests | JUnit 4, Hamcrest, AssertJ Swing, Moco | 4.13.2 / 3.0 / 3.17.1 / 1.6.1 |
 
 ## Logging
-Briefcase uses [SLF4J](https://www.slf4j.org/) with [Logback Classic](https://logback.qos.ch/) binding. The project also loads the [jcl-over-slf4j](https://www.slf4j.org/legacy.html) bridge for libraries that still use old [Apache Commons Logging](https://commons.apache.org/proper/commons-logging/).
 
-There are example configuration files that you can use while developing:
-- Copy `test/resources/logback-test.xml.example` to `test/resources/logback-test.xml`. This conf will be used when running tests.
-- Copy `res/logback.xml.example` to `res/logback.xml`. This conf will be used when launching Briefcase on your machine.
+Briefcase uses [SLF4J](https://www.slf4j.org/) with the [Logback Classic](https://logback.qos.ch/) binding, and the [jcl-over-slf4j](https://www.slf4j.org/legacy.html) bridge for libraries that still call Apache Commons Logging.
 
-### Logging tests vs development vs release
-During the release process, we use a specific logback configuration which logs to a `briefcase.log` file in the folder Briefcase is launched from.
+- `res/logback.xml` (copy from `res/logback.xml.example`) is loaded when you launch Briefcase.
+- `test/resources/logback-test.xml` (copy from the `.example` file) is loaded by tests.
+- `res/logback.xml.example-release` rolls a `briefcase.log` next to the working directory and is what a release build should use. See [docs/how-to-release.md](docs/how-to-release.md).
 
-For testing and development purposes, customization of logback conf files is encouraged, especially to filter different levels of logging for specific packages. The following example sets the default level to `INFO` and `DEBUG` for components under `org.opendatakit`:
+Example that logs `org.opendatakit` at DEBUG and everything else at INFO:
 
 ```xml
 <configuration>
@@ -79,31 +169,23 @@ For testing and development purposes, customization of logback conf files is enc
 </configuration>
 ```
 
-More information on Logback configuration is available [here](https://logback.qos.ch/manual/configuration.html).
+Logback configuration reference: [https://logback.qos.ch/manual/configuration.html](https://logback.qos.ch/manual/configuration.html).
 
-## Extended topics
+## Documentation in this repo
 
-There is a [`/docs`](./docs) directory in the repo with more documentation files that expand on certain topics:
+- [CHANGELOG.md](CHANGELOG.md) — changes in this fork since the archived upstream
+- [docs/export-format.md](docs/export-format.md) — Briefcase CSV export format
+- [docs/how-to-release.md](docs/how-to-release.md) — cutting a release JAR
+- [CONTRIBUTING.md](CONTRIBUTING.md) — how to send changes
 
-- [Briefcase export CSV format](./docs/export-format.md)
-- [How to release a Briefcase version](./docs/how-to-release.md)
+## Contributing
 
-## Contributing code
-Any and all contributions to the project are welcome. ODK Briefcase is used across the world primarily by organizations with a social purpose so you can have real impact!
+Contributions are welcome. Briefcase is used by organizations doing social-purpose data collection, and this fork is where that code continues.
 
-If you're ready to contribute code, see [the contribution guide](CONTRIBUTING.md).
+1. Open an issue or a pull request against [GeekLord/odk-briefcase](https://github.com/GeekLord/odk-briefcase).
+2. Run `./gradlew check` and fix anything it reports (tests, checkstyle, JaCoCo report).
+3. Follow [CONTRIBUTING.md](CONTRIBUTING.md).
 
-## Contributing testing
-All releases are verified on the following operating systems:
-* Ubuntu 16.04
-* Windows 10
-* OS X 10.11.6
+Please verify changes on current Linux, Windows, and macOS. The historical testing checklist is the [Briefcase testing plan](https://docs.google.com/spreadsheets/d/1H46G7OW21rk5skSyjpEx3dCZVv5Ly4WDK8LISmrz714/edit?usp=sharing). After testing a pull request, report results with a template from [Testing result templates](.github/TESTING_RESULT_TEMPLATES.md).
 
-Testing checklists can be found on the [Briefcase testing plan](https://docs.google.com/spreadsheets/d/1H46G7OW21rk5skSyjpEx3dCZVv5Ly4WDK8LISmrz714/edit?usp=sharing).
-
-If you have finished testing a pull request, please use a template from [Testing result templates](.github/TESTING_RESULT_TEMPLATES.md) to report your insights.
-
-## Downloading builds
-Per-commit debug builds can be found on [CircleCI](https://circleci.com/gh/getodk/briefcase). Login with your GitHub account, click the build you'd like, then find the JAR in the Artifacts tab under $CIRCLE_ARTIFACTS/libs.
-
-Current and previous production builds can be found on the [ODK website](https://getodk.org/software/#odk-briefcase).
+Maintainer: **Shobhit Kumar Prabhakar** ([@GeekLord](https://github.com/GeekLord)).
