@@ -87,13 +87,15 @@ We use [semantic versioning](https://semver.org/): vx.y.z
 
    Tracking IDs follow the pattern `UA-12345678-1`
 
-7. Ensure that you're using Java 11 from the Java.net vendor. Run `java -version` and confirm you get this:
+7. Ensure that you're using a Java 17 (or later) JDK. Run `java -version` and confirm the reported version is at least 17, for example:
 
     ```
-    openjdk version "11.0.2" 2019-01-15
-    OpenJDK Runtime Environment 18.9 (build 11.0.2+9)
-    OpenJDK 64-Bit Server VM 18.9 (build 11.0.2+9, mixed mode)
+    openjdk version "17.0.12" 2024-07-16
+    OpenJDK Runtime Environment Temurin-17.0.12+7 (build 17.0.12+7)
+    OpenJDK 64-Bit Server VM Temurin-17.0.12+7 (build 17.0.12+7, mixed mode, sharing)
     ```
+
+    The build always produces Java 17 bytecode, regardless of which newer JDK you compile with.
 
 8. Build the release JAR file with `./gradlew clean build`
 
