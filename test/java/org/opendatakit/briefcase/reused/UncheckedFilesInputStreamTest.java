@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

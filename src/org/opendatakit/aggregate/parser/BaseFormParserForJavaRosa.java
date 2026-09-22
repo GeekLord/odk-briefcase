@@ -18,7 +18,6 @@
 package org.opendatakit.aggregate.parser;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -44,6 +43,7 @@ import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData;
 import org.opendatakit.aggregate.exception.ODKIncompleteSubmissionData.Reason;
 import org.opendatakit.aggregate.form.XFormParameters;
 import org.opendatakit.briefcase.util.StringUtils;
+import org.opendatakit.briefcase.util.XFormParsing;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -358,7 +358,7 @@ public class BaseFormParserForJavaRosa implements Serializable {
 
     XFormParserWithBindEnhancements xfp = parseFormDefinition(xml, this);
     try {
-      rootJavaRosaFormDef = xfp.parse();
+      rootJavaRosaFormDef = XFormParsing.parse(xfp);
     } catch (Exception e) {
       throw new ODKIncompleteSubmissionData(
           "Javarosa failed to construct a FormDef. Is this an XForm definition?", e,
@@ -492,8 +492,8 @@ public class BaseFormParserForJavaRosa implements Serializable {
       // storage for this form.
       XFormParserWithBindEnhancements exfp = parseFormDefinition(ENCRYPTED_FORM_DEFINITION, this);
       try {
-        formDef = exfp.parse();
-      } catch (IOException e) {
+        formDef = XFormParsing.parse(exfp);
+      } catch (XFormParser.ParseException e) {
         throw new ODKIncompleteSubmissionData("Exception " + e.toString() + " during parsing!", Reason.BAD_JR_PARSE);
       }
 

@@ -36,8 +36,6 @@ import static org.opendatakit.briefcase.ui.MainBriefcaseWindow.launchGUI;
 import static org.opendatakit.briefcase.util.Host.getOsName;
 
 import io.sentry.Sentry;
-import io.sentry.SentryClient;
-import java.util.Optional;
 import org.opendatakit.briefcase.model.BriefcasePreferences;
 import org.opendatakit.briefcase.operations.PullFormFromCentral;
 import org.opendatakit.briefcase.operations.PushFormToCentral;
@@ -60,7 +58,8 @@ public class Launcher {
     if (!appPreferences.hasKey(BRIEFCASE_TRACKING_CONSENT_PROPERTY))
       appPreferences.put(BRIEFCASE_TRACKING_CONSENT_PROPERTY, TRUE.toString());
 
-    Optional<SentryClient> sentry = SENTRY_ENABLED ? Optional.of(initSentryClient(appPreferences)) : Optional.empty();
+    if (SENTRY_ENABLED)
+      initSentry(appPreferences);
 
     new Cli()
         .deprecate(DEPRECATED_PULL_AGGREGATE, PULL_AGGREGATE)
@@ -84,30 +83,28 @@ public class Launcher {
               ? "Error: " + throwable.getMessage()
               : "Unexpected error in Briefcase. Please review briefcase.log for more information. For help, post to https://forum.getodk.org/c/support");
           log.error("Error", throwable);
-          sentry.ifPresent(client -> client.sendException(throwable));
+          if (SENTRY_ENABLED) {
+            Sentry.captureException(throwable);
+            // Events are sent asynchronously; give them a chance to leave before exiting
+            Sentry.flush(5000);
+          }
           System.exit(1);
         })
         .run(args);
   }
 
-  private static SentryClient initSentryClient(BriefcasePreferences appPreferences) {
-    Sentry.init(String.format(
-        "%s?release=%s&stacktrace.app.packages=org.opendatakit&tags=os:%s,jvm:%s",
-        SENTRY_DSN,
-        VERSION,
-        getOsName(),
-        System.getProperty("java.version")
-    ));
-
-    SentryClient sentry = Sentry.getStoredClient();
-
-    // Add a callback that will prevent sending crash reports to Sentry
-    // if the user disables tracking
-    sentry.addShouldSendEventCallback(event -> appPreferences
-        .nullSafeGet(BRIEFCASE_TRACKING_CONSENT_PROPERTY)
-        .map(Boolean::valueOf)
-        .orElse(true));
-
-    return sentry;
+  private static void initSentry(BriefcasePreferences appPreferences) {
+    Sentry.init(options -> {
+      options.setDsn(SENTRY_DSN);
+      options.setRelease(VERSION);
+      options.addInAppInclude("org.opendatakit");
+      options.setTag("os", getOsName());
+      options.setTag("jvm", System.getProperty("java.version"));
+      // Prevent sending crash reports to Sentry if the user disables tracking
+      options.setBeforeSend((event, hint) -> appPreferences
+          .nullSafeGet(BRIEFCASE_TRACKING_CONSENT_PROPERTY)
+          .map(Boolean::valueOf)
+          .orElse(true) ? event : null);
+    });
   }
 }

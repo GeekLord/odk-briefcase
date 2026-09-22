@@ -24,7 +24,6 @@ import static org.opendatakit.briefcase.ui.reused.UI.errorMessage;
 import java.util.Optional;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-
 import org.bushe.swing.event.EventBus;
 import org.bushe.swing.event.annotation.AnnotationProcessor;
 import org.bushe.swing.event.annotation.EventSubscriber;

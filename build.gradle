@@ -1,14 +1,12 @@
 plugins {
   id 'application'
   id 'checkstyle'
-  id 'de.fuerstenau.buildconfig' version '1.1.8'
   id 'idea'
   id 'jacoco'
 }
 
 repositories {
   mavenCentral()
-  maven { url = 'https://oss.sonatype.org/content/groups/public' }
 }
 
 sourceSets {
@@ -30,92 +28,109 @@ sourceSets {
   }
 }
 
-targetCompatibility = '1.8'
-sourceCompatibility = '1.8'
+tasks.withType(JavaCompile).configureEach {
+  // Produce Java 17 bytecode regardless of the (>= 17) JDK that runs the build
+  options.release = 17
+  options.encoding = 'UTF-8'
+}
+
+ext {
+  bouncyCastleVersion = '1.86'
+  httpClientVersion = '4.5.14'
+  slf4jVersion = '2.0.20'
+  logbackVersion = '1.6.3'
+  jacksonVersion = '2.22.3'
+}
 
 dependencies {
-  compile group: 'org.bouncycastle', name: 'bcprov-jdk16', version: '1.46'
-  compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
-  compile group: 'commons-io', name: 'commons-io', version: '2.6'
-  compile group: 'org.bushe', name: 'eventbus', version: '1.4'
-  compile(group: 'org.apache.httpcomponents', name: 'httpmime', version: '4.5.5') {
+  implementation "org.bouncycastle:bcprov-jdk18on:${bouncyCastleVersion}"
+  implementation "org.bouncycastle:bcpkix-jdk18on:${bouncyCastleVersion}"
+  implementation 'commons-cli:commons-cli:1.11.0'
+  implementation 'commons-io:commons-io:2.22.0'
+  implementation 'org.bushe:eventbus:1.4'
+  implementation("org.apache.httpcomponents:httpmime:${httpClientVersion}") {
     exclude group: 'commons-logging'
   }
-  compile group: 'net.sf.kxml', name: 'kxml2', version: '2.3.0'
-  compile(group: 'org.getodk', name: 'javarosa', version: '2.17.2') {
-    exclude group: 'org.slf4j'
+  implementation("org.apache.httpcomponents:httpclient:${httpClientVersion}") {
+    exclude group: 'commons-logging'
   }
-  compile group: 'org.hsqldb', name: 'hsqldb', version: '2.4.0'
-  compile(group: 'com.brsanthu', name: 'google-analytics-java', version: '2.0.0') {
+  implementation("org.apache.httpcomponents:fluent-hc:${httpClientVersion}") {
+    exclude group: 'commons-logging'
+  }
+  implementation 'net.sf.kxml:kxml2:2.3.0'
+  implementation('org.getodk:javarosa:6.0.0') {
+    exclude group: 'org.slf4j'
+    exclude group: 'ch.qos.logback'
+    // Test library wrongly published in JavaRosa's compile scope
+    exclude group: 'org.hamcrest'
+  }
+  implementation 'org.hsqldb:hsqldb:2.7.4'
+  implementation('com.brsanthu:google-analytics-java:2.0.0') {
     exclude group: 'org.slf4j'
     exclude group: 'org.apache.httpcomponents', module: 'httpclient'
   }
-  compile group: 'com.github.lgooddatepicker', name: 'LGoodDatePicker', version: '10.3.1'
-  compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.5'
-  compile group: 'org.apache.httpcomponents', name: 'fluent-hc', version: '4.5.5'
+  implementation 'com.github.lgooddatepicker:LGoodDatePicker:11.2.1'
 
-  testCompile group: 'junit', name: 'junit', version: '4.12'
-  testCompile('junit:junit:4.12') {
-    exclude group: 'org.hamcrest'
-  }
-  testCompile 'org.hamcrest:hamcrest-library:1.3'
-  testCompile 'com.github.npathai:hamcrest-optional:2.0.0'
-  testCompile 'org.assertj:assertj-swing-junit:3.8.0' // Required for Swing tests
-  testCompile "com.github.dreamhead:moco-core:0.12.0"
+  implementation 'de.grundid.opendatalab:geojson-jackson:1.14'
+  implementation platform("com.fasterxml.jackson:jackson-bom:${jacksonVersion}")
+  implementation 'com.fasterxml.jackson.core:jackson-core'
+  implementation 'com.fasterxml.jackson.core:jackson-databind'
+  implementation 'com.fasterxml.jackson.core:jackson-annotations'
 
-  compile files('lib/smallsql-0.21.jar')
+  implementation files('lib/smallsql-0.21.jar')
 
-  runtime group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
-  compile group: 'org.slf4j', name: 'jcl-over-slf4j', version: '1.7.25'
-  compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
-  compile('io.sentry:sentry-logback:1.6.8') {
+  implementation "org.slf4j:slf4j-api:${slf4jVersion}"
+  implementation "org.slf4j:jcl-over-slf4j:${slf4jVersion}"
+  implementation "ch.qos.logback:logback-classic:${logbackVersion}"
+  implementation('io.sentry:sentry-logback:8.57.0') {
     exclude group: 'org.slf4j'
     exclude group: 'ch.qos.logback'
   }
 
-  compile 'de.grundid.opendatalab:geojson-jackson:1.8'
+  testImplementation('junit:junit:4.13.2') {
+    exclude group: 'org.hamcrest'
+  }
+  testImplementation 'org.hamcrest:hamcrest:3.0'
+  testImplementation 'com.github.npathai:hamcrest-optional:2.0.0'
+  testImplementation 'org.assertj:assertj-swing-junit:3.17.1' // Required for Swing tests
+  testImplementation 'com.github.dreamhead:moco-core:1.6.1'
+}
+
+configurations.configureEach {
+  // Logging goes through SLF4J; make sure no other binding sneaks in
+  exclude group: 'commons-logging', module: 'commons-logging'
+}
+
+tasks.withType(Test).configureEach {
+  useJUnit()
+  // assertj-swing reflects into javax.swing internals, which JDK 17+ blocks by default
+  jvmArgs '--add-opens', 'java.desktop/javax.swing=ALL-UNNAMED',
+      '--add-opens', 'java.desktop/java.awt=ALL-UNNAMED',
+      '--add-opens', 'java.base/java.lang=ALL-UNNAMED'
+  systemProperty 'java.awt.headless', 'false'
+  testLogging {
+    events 'failed'
+    exceptionFormat = 'full'
+  }
 }
 
 jacocoTestReport {
   reports {
-        xml.enabled = true
+    xml.required = true
+    html.required = true
   }
 }
 
-// Required to use fileExtensions property in checkstyle file
 checkstyle {
-  toolVersion = '8.22'
+  toolVersion = '14.1.0'
+  configFile = file('config/checkstyle/checkstyle.xml')
 }
 
-ant.condition(property: 'os', value: 'windows') {
-  os(family: 'windows')
-}
-ant.condition(property: 'os', value: 'unix') {
-  os(family: 'unix')
-}
-
-// Use the result of git describe --tags --dirty as the version name
-// From http://stackoverflow.com/questions/17097263#24121734
-def getVersionName = { ->
-  try {
-    def stdout = new ByteArrayOutputStream()
-    exec {
-      switch (ant.properties.os) {
-        case 'windows':
-          commandLine 'cmd', '/c', 'git', 'describe', '--tags', '--dirty', '--always'
-          break
-        case 'unix':
-          commandLine 'git', 'describe', '--tags', '--dirty', '--always'
-          break
-      }
-      standardOutput = stdout
-    }
-    return stdout.toString().trim()
-  }
-  catch (ignored) {
-    return null
-  }
-}
+// Use the result of `git describe --tags --dirty --always` as the version name
+def gitDescribe = providers.exec {
+  commandLine 'git', 'describe', '--tags', '--dirty', '--always'
+  ignoreExitValue = true
+}.standardOutput.asText.map { it.trim() }
 
 String getValue(String key, String defaultValue) {
   if (this.hasProperty(key))
@@ -124,23 +139,62 @@ String getValue(String key, String defaultValue) {
     return defaultValue
 }
 
-buildConfig {
-  appName = 'ODK Briefcase'
-  version = getVersionName()
-  clsName = 'BuildConfig'
-  packageName = 'org.opendatakit.briefcase.buildconfig'
-  buildConfigField 'String', 'GOOGLE_TRACKING_ID', getValue("googleAnalytics.trackingId", "UA-91951913-3")
-  buildConfigField 'Boolean', 'SENTRY_ENABLED', getValue("sentry.enabled", "false")
-  buildConfigField 'String', 'SENTRY_DSN', getValue("sentry.dsn", "https://b6f023a5f17e44d9a46447f8827e2a41:1b1f33d68b1b4404b85cd627563d37f9@sentry.io/287258")
+def appName = 'ODK Briefcase'
+def appVersion = gitDescribe.getOrElse('')
+if (appVersion.isEmpty())
+  appVersion = 'unknown'
+
+version = appVersion
+
+// Generates org.opendatakit.briefcase.buildconfig.BuildConfig, which used to be
+// produced by the (unmaintained) de.fuerstenau.buildconfig plugin.
+def buildConfigDir = layout.buildDirectory.dir('generated/sources/buildConfig/java/main')
+def buildConfigValues = [
+    VERSION           : appVersion,
+    NAME              : appName,
+    GOOGLE_TRACKING_ID: getValue('googleAnalytics.trackingId', 'UA-91951913-3'),
+    SENTRY_ENABLED    : getValue('sentry.enabled', 'false'),
+    SENTRY_DSN        : getValue('sentry.dsn', 'https://b6f023a5f17e44d9a46447f8827e2a41:1b1f33d68b1b4404b85cd627563d37f9@sentry.io/287258'),
+]
+
+def generateBuildConfig = tasks.register('generateBuildConfig') {
+  def outputDir = buildConfigDir
+  def values = buildConfigValues
+  inputs.property('values', values)
+  outputs.dir(outputDir)
+  doLast {
+    def packageDir = outputDir.get().dir('org/opendatakit/briefcase/buildconfig').asFile
+    packageDir.mkdirs()
+    new File(packageDir, 'BuildConfig.java').text = """\
+package org.opendatakit.briefcase.buildconfig;
+
+/** DO NOT EDIT. GENERATED CODE */
+public final class BuildConfig {
+  private BuildConfig() { /* no instance */ }
+
+  public static final String VERSION = "${values.VERSION}";
+
+  public static final String NAME = "${values.NAME}";
+
+  public static final String GOOGLE_TRACKING_ID = "${values.GOOGLE_TRACKING_ID}";
+
+  public static final Boolean SENTRY_ENABLED = ${values.SENTRY_ENABLED};
+
+  public static final String SENTRY_DSN = "${values.SENTRY_DSN}";
+}
+"""
+  }
 }
 
-mainClassName = 'org.opendatakit.briefcase.Launcher'
+sourceSets.main.java.srcDir(generateBuildConfig)
+
+application {
+  mainClass = 'org.opendatakit.briefcase.Launcher'
+}
 
 jar {
-  archiveBaseName.set buildConfig.appName
-  version = buildConfig.version
-  archiveFileName.set "ODK-Briefcase-${version}.jar"
-  from configurations.runtime.collect { it }
+  archiveFileName = "ODK-Briefcase-${appVersion}.jar"
+  from configurations.runtimeClasspath
 
   // A single-click Java app requires a flat jar or class loader.
   // Fat/Flat/uber/shadow jars won't work because BouncyCastle is signed.
@@ -148,16 +202,19 @@ jar {
   // https://git.eclipse.org/c/jdt/eclipse.jdt.ui.git/plain/org.eclipse.jdt.ui/jar-in-jar-loader.zip
   from zipTree('lib/jar-in-jar-loader.zip')
 
+  duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+  def runtimeJarNames = configurations.runtimeClasspath.elements.map { files -> files.collect { it.asFile.name }.join(' ') }
   manifest {
     attributes 'Main-Class': 'org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader'
-    attributes 'Rsrc-Main-Class': mainClassName
+    attributes 'Rsrc-Main-Class': application.mainClass.get()
     attributes 'Class-Path': '.'
-    attributes 'Rsrc-Class-Path': './ ' + (configurations.runtime.collect { it.getName() }).join(' ')
+    attributes 'Rsrc-Class-Path': runtimeJarNames.map { './ ' + it }
   }
 }
 
 // Useful for testing
-task explodedJar(type: Copy) {
-  into '$buildDir/libs/$jar.baseName $jar.version'
+tasks.register('explodedJar', Copy) {
+  into layout.buildDirectory.dir("libs/ODK-Briefcase-${appVersion}")
   with jar
 }
