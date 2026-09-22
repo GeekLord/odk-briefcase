@@ -15,6 +15,10 @@ Its last release was [v1.18.0](https://github.com/getodk/briefcase/releases/tag/
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-09-22
+
+First release of this fork. Requires **Java 17 or newer** (v1.18.0 ran on Java 8).
+
 Modernization of the build, toolchain, and dependencies so the project compiles,
 tests, and packages on a current JDK. Application behavior (pull, push, export,
 settings, CLI) is unchanged aside from the compatibility fixes listed under
@@ -45,8 +49,9 @@ settings, CLI) is unchanged aside from the compatibility fixes listed under
   `VERSION`, `NAME`, `GOOGLE_TRACKING_ID`, `SENTRY_ENABLED`, `SENTRY_DSN`.
   `gradle.properties` keys `sentry.enabled`, `sentry.dsn`, and
   `googleAnalytics.trackingId` still override the defaults.
-- **Checkstyle 8.22 → 14.1.0**, still configured from
-  `config/checkstyle/checkstyle.xml`.
+- **Checkstyle 8.22 → 12.3.1**, still configured from
+  `config/checkstyle/checkstyle.xml`. Checkstyle 13 and later need Java 21,
+  so 12.3.1 is the newest release that runs on the Java 17 build.
 
 ### Dependencies
 
@@ -137,4 +142,5 @@ On JDK 21 with Gradle 9.7.1:
   Settings is enabled until a storage directory is chosen; after that, Pull,
   Push, Export, and Settings all open.
 
-[Unreleased]: https://github.com/GeekLord/odk-briefcase/pull/2
+[Unreleased]: https://github.com/GeekLord/odk-briefcase/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/GeekLord/odk-briefcase/releases/tag/v2.0.0
