@@ -15,6 +15,10 @@ Its last release was [v1.18.0](https://github.com/getodk/briefcase/releases/tag/
 
 ## [Unreleased]
 
+## [2.0.1] - 2026-09-26
+### Fixed
+- Point Briefcase version checks to the active GeekLord/odk-briefcase fork to stop showing update messages that direct users back to the archived parent repository.
+
 ## [2.0.0] - 2026-09-22
 
 First release of this fork. Requires **Java 17 or newer** (v1.18.0 ran on Java 8).
@@ -142,5 +146,6 @@ On JDK 21 with Gradle 9.7.1:
   Settings is enabled until a storage directory is chosen; after that, Pull,
   Push, Export, and Settings all open.
 
-[Unreleased]: https://github.com/GeekLord/odk-briefcase/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/GeekLord/odk-briefcase/compare/v2.0.1...HEAD
+[2.0.1]: https://github.com/GeekLord/odk-briefcase/releases/tag/v2.0.1
 [2.0.0]: https://github.com/GeekLord/odk-briefcase/releases/tag/v2.0.0
