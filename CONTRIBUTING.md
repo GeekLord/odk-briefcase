@@ -5,7 +5,7 @@ This is a living document. If you see something that could be improved, edit thi
 ## Submitting a pull request
 To contribute code to ODK Briefcase, you will need to open a [pull request](https://help.github.com/articles/about-pull-requests/) which will be reviewed by the community and then merged into the core project.
 
-1. [Set up your development environment](https://github.com/getodk/briefcase#setting-up-your-development-environment).
+1. [Set up your development environment](https://github.com/GeekLord/odk-briefcase#setting-up-your-development-environment).
 
 1. To make sure you have the latest version of the code, set up this repository as [a remote for your fork](https://help.github.com/articles/configuring-a-remote-for-a-fork/) and then [sync your fork](https://help.github.com/articles/syncing-a-fork/).
 
@@ -13,7 +13,7 @@ To contribute code to ODK Briefcase, you will need to open a [pull request](http
 
         git checkout -b NAME_OF_YOUR_BRANCH
 
-1. If there is an [issue](https://github.com/getodk/briefcase/issues) corresponding to what you will work on, put `@getodk-bot claim` as a comment on issue to say you are claiming it. If this is your first time contributing to the repo, the bot will send you an invite. Once you accept this invite, the bot will assign you to the issue. If there is no issue yet, create one to provide background on the problem you are solving.
+1. If there is an [issue](https://github.com/GeekLord/odk-briefcase/issues) corresponding to what you will work on, put `@getodk-bot claim` as a comment on issue to say you are claiming it. If this is your first time contributing to the repo, the bot will send you an invite. Once you accept this invite, the bot will assign you to the issue. If there is no issue yet, create one to provide background on the problem you are solving.
 
 1. Once you've made incremental progress towards you goal, commit your changes with a meaningful commit message. Use [keywords for closing issues](https://help.github.com/articles/closing-issues-via-commit-messages/) to refer to issues and have them automatically close when your changes are merged.
 
@@ -23,9 +23,9 @@ To contribute code to ODK Briefcase, you will need to open a [pull request](http
 
         git push
 
-1. When your changes are ready to be added to the core ODK Briefcase project, [open a pull request](https://help.github.com/articles/creating-a-pull-request/). Make sure to set the base fork to `getodk/briefcase`. Describe your changes in the comment, refer to any relevant issues using [keywords for closing issues](https://help.github.com/articles/closing-issues-via-commit-messages/) and tag any person you think might need to know about the changes.
+1. When your changes are ready to be added to the core ODK Briefcase project, [open a pull request](https://help.github.com/articles/creating-a-pull-request/). Make sure to set the base fork to `GeekLord/odk-briefcase`. Describe your changes in the comment, refer to any relevant issues using [keywords for closing issues](https://help.github.com/articles/closing-issues-via-commit-messages/) and tag any person you think might need to know about the changes.
 
-1. Pull requests will be reviewed when committers have time. If you haven't received a review in 10 days, you may notify committers by putting `@getodk/briefcase` in a comment.
+1. Pull requests will be reviewed when committers have time. If you haven't received a review in 10 days, you may notify committers by putting `@GeekLord/odk-briefcase` in a comment.
 
 ## Making sure your pull request is accepted
 1. Confirm that your code compiles.

@@ -146,7 +146,7 @@ public class FormDefinition {
                 if (choices != null)
                   choices.forEach(control::addSelectChoice);
               } catch (NullPointerException e) {
-                // Ignore (see https://github.com/getodk/briefcase/issues/789)
+                // Ignore (see https://github.com/GeekLord/odk-briefcase/issues/789)
               }
           }
         })

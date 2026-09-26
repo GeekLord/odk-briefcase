@@ -13,7 +13,7 @@ We use [semantic versioning](https://semver.org/): vx.y.z
 
 0. It's highly recommended you clone the git repo in a different directory to keep the development workspace separate from the release workspace.
 
-1. Go to the [GitHub repo releases page](https://github.com/getodk/briefcase/releases) and draft a new release
+1. Go to the [GitHub repo releases page](https://github.com/GeekLord/odk-briefcase/releases) and draft a new release
 
 2. Enter the new release version (e.g. `v1.12.0`)
 
@@ -22,7 +22,7 @@ We use [semantic versioning](https://semver.org/): vx.y.z
     - Write a description following the template:
 
       ```markdown
-      [All changes](https://github.com/getodk/briefcase/compare/v1...v2)
+      [All changes](https://github.com/GeekLord/odk-briefcase/compare/v1...v2)
 
       **Highlights**
       - Some highlighted feature
@@ -110,7 +110,7 @@ We use [semantic versioning](https://semver.org/): vx.y.z
 
 - The process is basically the same as with normal version with some small differences:
   - We append the version number with `-beta.N`, replacing `N` with the number of the beta, starting with `0`
-  - We check the `This is a pre-release` checkbox to avoid it being linked from https://github.com/getodk/briefcase/releases/latest
+  - We check the `This is a pre-release` checkbox to avoid it being linked from https://github.com/GeekLord/odk-briefcase/releases/latest
 
 ## Post-release considerations
 
@@ -127,7 +127,7 @@ We use [semantic versioning](https://semver.org/): vx.y.z
    {
      "version": "v1.12.0",
      "refs": [{
-         "repository":"getodk/briefcase",
+         "repository":"GeekLord/odk-briefcase",
          "commit":"{LAST_COMMIT_OF_THIS_RELEASE}",
          "previousCommit":"{LAST_COMMIT_OF_PREVIOUS_RELEASE}"
      }],
@@ -161,7 +161,7 @@ We use [semantic versioning](https://semver.org/): vx.y.z
     - New errors export output to make it easier to provide support
 
   **Download release**
-  * [ODK-Briefcase-v1.12.0.jar](https://github.com/getodk/briefcase/releases/download/v1.12.0/ODK-Briefcase-v1.12.0.jar)
+  * [ODK-Briefcase-v1.12.0.jar](https://github.com/GeekLord/odk-briefcase/releases/download/v1.12.0/ODK-Briefcase-v1.12.0.jar)
 
   **Report issues**
   * https://forum.getodk.org/c/support
@@ -186,8 +186,8 @@ We use [semantic versioning](https://semver.org/): vx.y.z
     - Enable pulling submissions in parallel
   - New errors export output to make it easier to provide support
 
-  If you have a bit more time, please also verify the other changes in the [release notes](https://github.com/getodk/briefcase/releases/tag/v1.12.0-beta.0). Again, this beta will be released on Wednesday unless you report issues below.
+  If you have a bit more time, please also verify the other changes in the [release notes](https://github.com/GeekLord/odk-briefcase/releases/tag/v1.12.0-beta.0). Again, this beta will be released on Wednesday unless you report issues below.
 
   **Download beta**
-  * [ODK-Briefcase-v1.12.0-beta.0.jar](https://github.com/getodk/briefcase/releases/download/v1.12.0-beta.0/ODK-Briefcase-v1.12.0-beta.0.jar)
+  * [ODK-Briefcase-v1.12.0-beta.0.jar](https://github.com/GeekLord/odk-briefcase/releases/download/v1.12.0-beta.0/ODK-Briefcase-v1.12.0-beta.0.jar)
   ```
