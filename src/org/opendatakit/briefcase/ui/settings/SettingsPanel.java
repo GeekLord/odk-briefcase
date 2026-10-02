@@ -78,20 +78,23 @@ public class SettingsPanel {
       analytics.enableTracking(enabled, false);
     });
     form.onThemeChange(theme -> {
-      appPreferences.setTheme(theme);
       try {
         if ("Light".equals(theme)) {
           UIManager.setLookAndFeel(new FlatLightLaf());
         } else if ("Dark".equals(theme)) {
           UIManager.setLookAndFeel(new FlatDarkLaf());
+        } else if ("System".equals(theme)) {
+          UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } else {
           UIManager.setLookAndFeel(new FlatLightLaf());
         }
+        appPreferences.setTheme(theme);
         for (Window window : Window.getWindows()) {
           SwingUtilities.updateComponentTreeUI(window);
         }
       } catch (Exception e) {
-        // Ignore exception
+        // Rollback on failure
+        appPreferences.getTheme().ifPresent(form::setTheme);
       }
     });
     form.onHttpProxy(proxy -> {

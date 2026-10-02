@@ -305,7 +305,7 @@ public class SettingsPanelForm {
     themeDropdown = new JComboBox<>(new String[]{"System", "Light", "Dark"});
     gbc = new GridBagConstraints();
     gbc.gridx = 1;
-    gbc.gridy = 11;
+    gbc.gridy = 13;
     gbc.gridwidth = 5;
     gbc.anchor = GridBagConstraints.WEST;
     container.add(themeDropdown, gbc);

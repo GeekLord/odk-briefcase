@@ -92,6 +92,8 @@ public class MainBriefcaseWindow {
       if (themeOpt.isPresent()) {
         if ("Dark".equals(themeOpt.get())) {
           UIManager.setLookAndFeel(new FlatDarkLaf());
+        } else if ("System".equals(themeOpt.get())) {
+          UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } else {
           UIManager.setLookAndFeel(new FlatLightLaf());
         }
