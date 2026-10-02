@@ -31,6 +31,8 @@ import static org.opendatakit.briefcase.ui.reused.UI.makeClickable;
 import static org.opendatakit.briefcase.ui.reused.UI.uncheckedBrowse;
 import static org.opendatakit.briefcase.util.BriefcaseVersionManager.getLatestUrl;
 
+import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.FlatLightLaf;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
@@ -49,7 +51,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
-import javax.swing.plaf.metal.MetalLookAndFeel;
 import org.bushe.swing.event.annotation.AnnotationProcessor;
 import org.bushe.swing.event.annotation.EventSubscriber;
 import org.opendatakit.briefcase.buildconfig.BuildConfig;
@@ -65,7 +66,6 @@ import org.opendatakit.briefcase.ui.reused.Analytics;
 import org.opendatakit.briefcase.ui.settings.SettingsPanel;
 import org.opendatakit.briefcase.util.BriefcaseVersionManager;
 import org.opendatakit.briefcase.util.FormCache;
-import org.opendatakit.briefcase.util.Host;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,10 +87,19 @@ public class MainBriefcaseWindow {
 
   public static void launchGUI() {
     try {
-      if (Host.isLinux())
-        UIManager.setLookAndFeel(new MetalLookAndFeel());
-      else
-        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+      BriefcasePreferences appPreferences = BriefcasePreferences.appScoped();
+      Optional<String> themeOpt = appPreferences.getTheme();
+      if (themeOpt.isPresent()) {
+        if ("Dark".equals(themeOpt.get())) {
+          UIManager.setLookAndFeel(new FlatDarkLaf());
+        } else if ("System".equals(themeOpt.get())) {
+          UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } else {
+          UIManager.setLookAndFeel(new FlatLightLaf());
+        }
+      } else {
+        UIManager.setLookAndFeel(new FlatLightLaf());
+      }
       new MainBriefcaseWindow();
     } catch (Exception e) {
       log.error("Failed to launch GUI", e);

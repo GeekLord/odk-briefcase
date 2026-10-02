@@ -53,6 +53,7 @@ public class BriefcasePreferences {
   private static final String BRIEFCASE_MAX_HTTP_CONNECTIONS_PROPERTY = "maxHttpConnections";
   public static final String BRIEFCASE_DIR = "ODK Briefcase Storage";
   private static final String TRACKING_WARNING_SHOWED_PREF_KEY = "tracking warning showed";
+  public static final String BRIEFCASE_THEME_PROPERTY = "briefcaseTheme";
 
   static {
     // load the security provider
@@ -320,6 +321,14 @@ public class BriefcasePreferences {
 
   public boolean hasKey(String key) {
     return keys().contains(key);
+  }
+
+  public void setTheme(String theme) {
+    put(BRIEFCASE_THEME_PROPERTY, theme);
+  }
+
+  public Optional<String> getTheme() {
+    return nullSafeGet(BRIEFCASE_THEME_PROPERTY);
   }
 
 }
