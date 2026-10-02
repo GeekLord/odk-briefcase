@@ -19,8 +19,13 @@ package org.opendatakit.briefcase.ui.settings;
 import static org.opendatakit.briefcase.model.form.FormMetadataCommands.cleanAllCursors;
 import static org.opendatakit.briefcase.ui.reused.UI.infoMessage;
 
+import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.FlatLightLaf;
+import java.awt.Window;
 import java.nio.file.Path;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import org.opendatakit.briefcase.model.BriefcasePreferences;
 import org.opendatakit.briefcase.model.form.FormMetadataPort;
 import org.opendatakit.briefcase.reused.BriefcaseException;
@@ -44,6 +49,7 @@ public class SettingsPanel {
     appPreferences.getStartFromLast().ifPresent(form::setResumeLastPull);
     appPreferences.getRememberPasswords().ifPresent(form::setRememberPasswords);
     appPreferences.getSendUsageData().ifPresent(form::setSendUsageData);
+    appPreferences.getTheme().ifPresent(form::setTheme);
     appPreferences.getHttpProxy().ifPresent(httpProxy -> {
       form.enableUseHttpProxy();
       form.setHttpProxy(httpProxy);
@@ -70,6 +76,23 @@ public class SettingsPanel {
     form.onSendUsageDataChange(enabled -> {
       appPreferences.setSendUsage(enabled);
       analytics.enableTracking(enabled, false);
+    });
+    form.onThemeChange(theme -> {
+      appPreferences.setTheme(theme);
+      try {
+        if ("Light".equals(theme)) {
+          UIManager.setLookAndFeel(new FlatLightLaf());
+        } else if ("Dark".equals(theme)) {
+          UIManager.setLookAndFeel(new FlatDarkLaf());
+        } else {
+          UIManager.setLookAndFeel(new FlatLightLaf());
+        }
+        for (Window window : Window.getWindows()) {
+          SwingUtilities.updateComponentTreeUI(window);
+        }
+      } catch (Exception e) {
+        // Ignore exception
+      }
     });
     form.onHttpProxy(proxy -> {
       http.setProxy(proxy);

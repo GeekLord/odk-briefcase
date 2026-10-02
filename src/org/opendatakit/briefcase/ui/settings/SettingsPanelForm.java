@@ -36,6 +36,7 @@ import java.util.function.Consumer;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -61,6 +62,7 @@ public class SettingsPanelForm {
   private JCheckBox sendUsageDataField;
   private JCheckBox useHttpProxyField;
   private JTextField httpProxyHostField;
+  private JComboBox<String> themeDropdown;
   private JSpinner httpProxyPortField;
   private JLabel httpProxyPortLabel;
   private JLabel httpProxyHostLabel;
@@ -205,6 +207,15 @@ public class SettingsPanelForm {
     sendUsageDataField.setSelected(enabled);
   }
 
+  void onThemeChange(Consumer<String> callback) {
+    themeDropdown.addActionListener(__ -> callback.accept((String) themeDropdown.getSelectedItem()));
+  }
+
+  void setTheme(String theme) {
+    if (theme != null)
+      themeDropdown.setSelectedItem(theme);
+  }
+
   void onReloadCache(Runnable callback) {
     reloadCacheButton.addActionListener(__ -> callback.run());
   }
@@ -290,6 +301,15 @@ public class SettingsPanelForm {
     gbc.gridwidth = 5;
     gbc.anchor = GridBagConstraints.WEST;
     container.add(sendUsageDataField, gbc);
+
+    themeDropdown = new JComboBox<>(new String[]{"System", "Light", "Dark"});
+    gbc = new GridBagConstraints();
+    gbc.gridx = 1;
+    gbc.gridy = 11;
+    gbc.gridwidth = 5;
+    gbc.anchor = GridBagConstraints.WEST;
+    container.add(themeDropdown, gbc);
+
     useHttpProxyField = new JCheckBox();
     useHttpProxyField.setText("Use HTTP Proxy");
     gbc = new GridBagConstraints();
